@@ -1,0 +1,6 @@
+{
+  "AI_PRESET_API_URL": "",
+  "AI_LLM_API_URL": "https://api.openai.com/v1/chat/completions",
+  "AI_LLM_API_KEY": "REPLACE_WITH_YOUR_KEY",
+  "AI_LLM_MODEL": "gpt-4o-mini"
+}
