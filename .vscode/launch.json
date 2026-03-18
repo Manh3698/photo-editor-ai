@@ -18,6 +18,15 @@
       "args": [
         "--dart-define-from-file=env/dev.json"
       ]
+    },
+    {
+      "name": "Flutter iOS (dev env)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "ios",
+      "args": [
+        "--dart-define-from-file=env/dev.json"
+      ]
     }
   ]
 }

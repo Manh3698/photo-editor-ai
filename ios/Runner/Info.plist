@@ -27,7 +27,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>App can save edited photos to your library.</string>
+	<string>App saves edited photos to your library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>App needs access to your photo library to let you pick images for editing.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

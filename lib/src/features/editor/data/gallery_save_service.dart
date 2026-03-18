@@ -20,7 +20,8 @@ class GallerySaveService {
     final saved = await GallerySaver.saveImage(
       file.path,
       albumName: 'PhotoEditorAI',
-      toDcim: true,
+      // toDcim saves into DCIM folder on Android; not applicable on iOS.
+      toDcim: Platform.isAndroid,
     );
 
     return saved ?? false;

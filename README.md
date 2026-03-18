@@ -97,30 +97,29 @@ Output path:
 
 ## Run On iOS (Detailed)
 
-Important: iOS build/run requires macOS + Xcode. You cannot build iOS locally on Windows.
+> **Requires macOS + Xcode.** iOS builds cannot be produced on Windows or Linux.
 
 ### 1. Prerequisites (macOS)
 
-1. Install latest Xcode from App Store.
-2. Install CocoaPods:
+1. Install the latest **Xcode** from the App Store (≥ Xcode 15 recommended).
+2. Open Xcode once and accept the license / install additional components when prompted.
+3. Install **CocoaPods**:
 
 ```bash
 sudo gem install cocoapods
 ```
 
-3. Open Xcode once and install additional components.
-4. Verify:
+4. Install Flutter for macOS (if not already) and verify the full toolchain:
 
 ```bash
 flutter doctor -v
 ```
 
-You should see:
-- Flutter: OK
-- Xcode: OK
-- CocoaPods: OK
+Expected healthy items: Flutter, Xcode, CocoaPods, and (optionally) VS Code.
 
-### 2. Prepare Project (macOS terminal)
+---
+
+### 2. Prepare Project (macOS Terminal)
 
 ```bash
 flutter pub get
@@ -129,60 +128,7 @@ pod install
 cd ..
 ```
 
-### 3. Run On iOS Simulator
-
-List simulators:
-
-```bash
-flutter devices
-```
-
-Run:
-
-```bash
-flutter run -d ios --dart-define-from-file=env/dev.json
-```
-
-Or run with specific simulator id:
-
-```bash
-flutter run -d <ios-simulator-id> --dart-define-from-file=env/dev.json
-```
-
-### 4. Run On Real iPhone
-
-1. Open `ios/Runner.xcworkspace` in Xcode.
-2. In Signing & Capabilities, select Team and Bundle Identifier.
-3. Connect iPhone, trust computer/device certificate.
-4. Then run:
-
-```bash
-flutter run -d <iphone-device-id> --dart-define-from-file=env/dev.json
-```
-
-### 5. Build iOS App
-
-```bash
-flutter build ios --release --dart-define-from-file=env/prod.json
-```
-
-Then archive/upload via Xcode Organizer.
-
-## Troubleshooting
-
-### Android
-
-1. Device not found:
-- Check `flutter devices`.
-- Ensure emulator is running or USB debugging is enabled.
-
-2. Gradle build fails:
-- Run `flutter clean` then `flutter pub get`.
-- Re-check Android SDK components in Android Studio SDK Manager.
-
-### iOS
-
-1. CocoaPods error:
+If `pod install` fails with a version conflict, run:
 
 ```bash
 cd ios
@@ -191,12 +137,169 @@ pod install
 cd ..
 ```
 
-2. Signing error:
-- Verify Team/Bundle ID in Xcode.
-- Ensure Apple Developer account is active.
+---
 
-3. Build on Windows fails for iOS:
-- Expected behavior. Move to macOS machine or CI runner on macOS.
+### 3. Run On iOS Simulator
+
+List available simulators:
+
+```bash
+flutter devices
+# or
+xcrun simctl list devices
+```
+
+Boot a simulator and run:
+
+```bash
+flutter run -d ios --dart-define-from-file=env/dev.json
+```
+
+Run on a specific simulator by id:
+
+```bash
+flutter run -d <simulator-id> --dart-define-from-file=env/dev.json
+```
+
+> Note: `Save to device` saves to the Simulator's photo library. You can view it inside the Simulator's Photos app.
+
+---
+
+### 4. Run On a Real iPhone / iPad
+
+#### 4a. Apple Developer account
+
+You need a free or paid Apple Developer account. A **free account** lets you sideload onto your own device (7-day cert expiry). A **paid account** ($99/year) lets you deploy more broadly and to TestFlight.
+
+#### 4b. Register your device UDID (free account only)
+
+1. Connect iPhone via USB.
+2. Open Xcode → `Window → Devices and Simulators`.
+3. Note the **Identifier** (UDID) shown next to your device.
+4. Free accounts automatically register the device on first run from Xcode; paid accounts register via the Developer Portal.
+
+#### 4c. Configure signing in Xcode
+
+1. Open `ios/Runner.xcworkspace` (not `.xcodeproj`) in Xcode.
+2. Select the **Runner** target → **Signing & Capabilities** tab.
+3. Tick **Automatically manage signing**.
+4. Select your **Team** from the dropdown (your Apple ID).
+5. Set a unique **Bundle Identifier**, e.g. `com.yourname.photoeditorai`.
+6. Xcode will automatically create a Development certificate and Provisioning Profile.
+
+#### 4d. Trust the developer certificate on your device
+
+> First-time setup only.
+
+1. On your iPhone: **Settings → General → VPN & Device Management**.
+2. Tap your developer account name under "Developer App".
+3. Tap **Trust "Apple Development: …"** → confirm.
+
+#### 4e. Run from terminal
+
+Connect iPhone via USB, then:
+
+```bash
+flutter devices
+```
+
+Find your device id (e.g. `00008030-001234ABCDEF001E`), then:
+
+```bash
+flutter run -d 00008030-001234ABCDEF001E --dart-define-from-file=env/dev.json
+```
+
+Or let Flutter pick the only connected physical device:
+
+```bash
+flutter run -d ios --dart-define-from-file=env/dev.json
+```
+
+VS Code: select **Flutter iOS (dev env)** from the Run & Debug panel (`.vscode/launch.json` is already configured).
+
+---
+
+### 5. Wireless Debugging (USB-free after first pairing)
+
+1. Connect iPhone via USB at least once.
+2. In Xcode: `Window → Devices and Simulators` → select device → tick **Connect via network**.
+3. Disconnect USB. The device stays listed in `flutter devices` over Wi-Fi as long as Mac and iPhone are on the same network.
+4. Run as normal using the wireless device id.
+
+---
+
+### 6. Build iOS App (Release)
+
+```bash
+flutter build ios --release --dart-define-from-file=env/prod.json
+```
+
+Then in Xcode: **Product → Archive → Distribute App** (App Store / Ad Hoc / Development).
+
+---
+
+### 7. iOS Permissions Configured
+
+The following usage descriptions are declared in `ios/Runner/Info.plist` and will be shown to the user:
+
+| Permission | Key | When triggered |
+|---|---|---|
+| Photo library read | `NSPhotoLibraryUsageDescription` | Picking an image to edit |
+| Photo library write | `NSPhotoLibraryAddUsageDescription` | Saving edited image to Photos |
+
+---
+
+## Troubleshooting
+
+### Android
+
+1. Device not found:
+   - Check `flutter devices`.
+   - Ensure emulator is running or USB debugging is enabled on physical device.
+
+2. Gradle build fails:
+
+```bash
+flutter clean
+flutter pub get
+```
+
+   Re-check Android SDK components in Android Studio SDK Manager.
+
+### iOS
+
+1. **CocoaPods error**:
+
+```bash
+cd ios
+pod repo update
+pod install
+cd ..
+```
+
+2. **Signing error** ("No profiles for … were found"):
+   - Open `ios/Runner.xcworkspace` in Xcode.
+   - Signing & Capabilities → verify Team and Bundle ID.
+   - Click **Try Again** next to the error or go to **Xcode → Preferences → Accounts** and refresh certificates.
+
+3. **"Untrusted Developer"** on device:
+   - Settings → General → VPN & Device Management → Trust your cert.
+
+4. **Free account cert expired** (7-day limit):
+   - Re-run `flutter run` from Xcode or terminal; Xcode will re-sign automatically.
+   - Or upgrade to a paid Apple Developer account.
+
+5. **Wireless device drops from `flutter devices`**:
+   - Ensure Mac and iPhone are on the same Wi-Fi network.
+   - Re-enable **Connect via network** in the Xcode Devices panel.
+
+6. **Build on Windows fails for iOS**:
+   - Expected. Move to a macOS machine or use a macOS CI runner (e.g. GitHub Actions `macos-latest`).
+
+7. **`Save to device` doesn't appear in Photos**:
+   - On first save, iOS will prompt for photo library permission — tap **Allow**.
+   - Check `NSPhotoLibraryAddUsageDescription` is present in `Info.plist` (already added).
+   - On simulator, saved images appear in the Simulator's Photos app under the `PhotoEditorAI` album.
 
 ## AI Integration
 
